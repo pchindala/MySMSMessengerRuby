@@ -33,7 +33,7 @@ class MessageHistoriesController < ApplicationController
       puts "message history--------------------------#{message.message_status} is the message_status "
       ActionCable.server.broadcast(
         "message_status_#{message.user_id}",
-        { sid: message.twilio_sid, status: message.message_status }
+        { sid: message.twilio_sid, status: message.message_status,message_data: message.as_json }
       )
       head :ok
     else

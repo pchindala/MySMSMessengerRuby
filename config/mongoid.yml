@@ -5,7 +5,7 @@ development:
     default:
       # Mongoid can connect to a URI accepted by the driver:
       # uri: mongodb://user:password@mongodb.domain.com:27017/my_sms_messenger_ruby_development
-      uri: mongodb+srv://smsmessengerdb:smsmessengerdb@smsmessengerdb.rzfevd5.mongodb.net/SMSMessengerDB?authSource=admin&retryWrites=true&w=majority&appName=SMSMessengerDB
+      uri: <%= ENV.fetch('mongoDB_URI') %>
       # Otherwise define the parameters separately.
       # This defines the name of the default database that Mongoid can connect to.
       # (required).
