@@ -38,6 +38,7 @@
 # pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
 
 
+require 'puma/daemon'
 
 
 # SSL Configuration
