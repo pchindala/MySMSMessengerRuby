@@ -11,7 +11,6 @@ class MessageHistory
   field :message_error, type: String
   # before_save :send_twilio_message
   def send_twilio_message
-    binding.pry if Rails.env.development?
     twilio_service = TwilioService.new
     t = twilio_service.send_sms(self.to, self.message)
     self.twilio_sid = t.sid
