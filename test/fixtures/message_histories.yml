@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_id: MyString
+  from: MyString
+  to: MyString
+  time_in_utc: 2025-07-17 03:13:10
+  message: MyString
+  status: MyString
+  mgs_count: 1
+  twilio_sid: MyString
+  message_status: MyString
+  message_error: MyString
+
+two:
+  user_id: MyString
+  from: MyString
+  to: MyString
+  time_in_utc: 2025-07-17 03:13:10
+  message: MyString
+  status: MyString
+  mgs_count: 1
+  twilio_sid: MyString
+  message_status: MyString
+  message_error: MyString
