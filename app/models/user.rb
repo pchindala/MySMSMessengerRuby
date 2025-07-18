@@ -46,7 +46,7 @@ class User
   # field :unlock_token,    type: String # Only if unlock strategy is :email or :both
   # field :locked_at,       type: Time
   def generate_jwt
-    JWT.encode({ sub: self.id, jti: self.jti,exp: 1.minutes.from_now.to_i }, ENV['JWT_SECRET_KEY'], 'HS256') 
+    JWT.encode({ sub: self.id, jti: self.jti,exp: 1.hour.from_now.to_i }, ENV['JWT_SECRET_KEY'], 'HS256') 
   end
   
   private

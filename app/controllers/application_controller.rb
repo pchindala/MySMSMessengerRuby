@@ -4,18 +4,16 @@ class ApplicationController < ActionController::API
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   # before_action :debugging
-  before_action :valid?,only: [:authenticate!]
+  # before_action :valid?,only: [:authenticate!]
   def authenticate!
     token = auth_header.split(' ').last
     payload = JWT.decode(token, ENV['JWT_SECRET_KEY'], true, { algorithm: 'HS256' }).first
     user = User.find_by(id: payload['sub'])
     if user.nil? || JwtDenylist.find_by(jti: payload['jti']).present?
-     return render(json: { error: 'user not fount or session not found' }, status: :unauthorized)
-    else
-    current_user
+      render(json: { error: 'user not fount or session not found' }, status: :unauthorized)
     end
   rescue JWT::DecodeError, Mongoid::Errors::DocumentNotFound
-    return render json: { error: 'Unauthorizedsss' }, status: :unauthorized
+    render json: { error: 'session expired Unauthorizedsss' }, status: :unauthorized
   end
 
   private
@@ -42,12 +40,6 @@ class ApplicationController < ActionController::API
   
   def current_user
     payload = decode_jwt
-    @current_usr = User.find_by(id: payload['sub']) if payload
-  rescue Mongoid::Errors::DocumentNotFound
-    return render json: { error: 'Unauthorized' }, status: :unauthorized
-  end
-
-  def encode_jwt(user)
-    JWT.encode({ sub: user.id, jti: user.jti,exp: 1.hour.from_now.to_i }, ENV['JWT_SECRET_KEY'], 'HS256') 
+    User.find_by(id: payload['sub']) if payload
   end
 end

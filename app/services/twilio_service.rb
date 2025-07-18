@@ -12,7 +12,8 @@ class TwilioService
     @client.messages.create(
       from: @from,
       to: to,
-      body: body
+      body: body,
+      status_callback: "https://animated-acorn-jjrp76pxvv94hp9jr-3000.app.github.dev/api/message_histories/status_update"
     )
   end
 end
