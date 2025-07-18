@@ -38,47 +38,36 @@
 # pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
 
 
-require 'puma/daemon'
+# config/puma.rb
 
-
-# SSL Configuration
-ssl_bind '0.0.0.0', '443', {
-  key: '/etc/rails_ssl/server.key',
-  cert: '/etc/rails_ssl/server.crt',
-  verify_mode: 'none' # Since it's self-signed
-}
-
-# Bind to HTTP port for redirection
-bind 'tcp://0.0.0.0:80'
+# Remove daemonization (not needed with systemd)
+# require 'puma/daemon'
 
 # Worker configuration
-workers Integer(ENV.fetch("WEB_CONCURRENCY", 4))
+workers 0  # Single mode
 threads_count = Integer(ENV.fetch("RAILS_MAX_THREADS", 5))
 threads threads_count, threads_count
-
-preload_app!
 
 # Environment
 environment ENV.fetch("RAILS_ENV") { "production" }
 
-# Daemonize
-daemonize true
+# Logging - use relative paths
+stdout_redirect "log/puma.stdout.log", "log/puma.stderr.log", true
 
-# Logging
-stdout_redirect "/var/log/puma/stdout.log", "/var/log/puma/stderr.log", true
+# PID and state - use relative paths
+pidfile "tmp/pids/puma.pid"
+state_path "tmp/pids/puma.state"
 
-# PID and state
-pidfile "/var/run/puma/puma.pid"
-state_path "/var/run/puma/puma.state"
-
-# Worker management
-on_worker_boot do
-  ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
-end
-
-before_fork do
-  ActiveRecord::Base.connection_pool.disconnect! if defined?(ActiveRecord)
-end
+# Worker management (not needed in single mode)
+# before_fork do
+#   ActiveRecord::Base.connection_pool.disconnect! if defined?(ActiveRecord)
+# end
 
 # Allow phased restarts
 plugin :tmp_restart
+
+# SSL binding
+bind 'ssl://0.0.0.0:3000?key=/etc/rails_ssl/server.key&cert=/etc/rails_ssl/server.crt&verify_mode=none'
+
+# Silence single worker warning
+silence_single_worker_warning
