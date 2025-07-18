@@ -13,7 +13,7 @@ class MessageHistoriesController < ApplicationController
     @message_history = current_user.message_histories.new(message_history_params)
     @message_history.from = ENV['TWILIO_PHONE_NUMBER']
     @message_history.mgs_count = @message_history.message.split("").count
-    @message_history.twilio_sid = random_uuid = SecureRandom.uuid if Rails.env.development?
+    @message_history.twilio_sid = SecureRandom.uuid
     if @message_history.save
       render json: @message_history, status: :created
     else
