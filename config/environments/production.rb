@@ -76,4 +76,23 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
    config.action_cable.disable_request_forgery_protection = true
   config.action_cable.allowed_request_origins = [ "*" ]
+  config.force_ssl = true
+
+# Disable domain requirement for SSL
+config.ssl_options = {
+  redirect: {
+    exclude: -> request { request.path =~ /healthcheck/ }
+  },
+  hsts: {
+    expires: 1.year,
+    preload: true,
+    subdomains: false
+  }
+}
+
+# Serve static files
+config.public_file_server.enabled = true
+
+# Configure cache
+config.cache_store = :memory_store, { size: 64.megabytes }
 end

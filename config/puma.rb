@@ -24,15 +24,60 @@
 # Any libraries that use a connection pool or another resource pool should
 # be configured to provide at least as many connections as the number of
 # threads. This includes Active Record's `pool` parameter in `database.yml`.
-threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
+# threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
+# threads threads_count, threads_count
+
+# # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
+# port ENV.fetch("PORT", 3000)
+
+# # Allow puma to be restarted by `bin/rails restart` command.
+# plugin :tmp_restart
+
+# # Specify the PID file. Defaults to tmp/pids/server.pid in development.
+# # In other environments, only set the PID file if requested.
+# pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+
+
+
+# SSL Configuration
+ssl_bind '0.0.0.0', '443', {
+  key: '/etc/rails_ssl/server.key',
+  cert: '/etc/rails_ssl/server.crt',
+  verify_mode: 'none' # Since it's self-signed
+}
+
+# Bind to HTTP port for redirection
+bind 'tcp://0.0.0.0:80'
+
+# Worker configuration
+workers Integer(ENV.fetch("WEB_CONCURRENCY", 4))
+threads_count = Integer(ENV.fetch("RAILS_MAX_THREADS", 5))
 threads threads_count, threads_count
 
-# Specifies the `port` that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT", 3000)
+preload_app!
 
-# Allow puma to be restarted by `bin/rails restart` command.
+# Environment
+environment ENV.fetch("RAILS_ENV") { "production" }
+
+# Daemonize
+daemonize true
+
+# Logging
+stdout_redirect "/var/log/puma/stdout.log", "/var/log/puma/stderr.log", true
+
+# PID and state
+pidfile "/var/run/puma/puma.pid"
+state_path "/var/run/puma/puma.state"
+
+# Worker management
+on_worker_boot do
+  ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+end
+
+before_fork do
+  ActiveRecord::Base.connection_pool.disconnect! if defined?(ActiveRecord)
+end
+
+# Allow phased restarts
 plugin :tmp_restart
-
-# Specify the PID file. Defaults to tmp/pids/server.pid in development.
-# In other environments, only set the PID file if requested.
-pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
