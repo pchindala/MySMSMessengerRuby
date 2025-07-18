@@ -22,7 +22,6 @@ class MessageHistoriesController < ApplicationController
   end
 
   def status_update
-    binding.pry
     message_sid = params[:MessageSid]
     status = params[:MessageStatus]
     # Find and update message history
@@ -30,7 +29,8 @@ class MessageHistoriesController < ApplicationController
     if message
       message.update!(message_status: status)
 
-      puts "--------------------------#{message.twilio_sid} is the message_sid "
+      puts "message history--------------------------#{message.twilio_sid} is the message_sid "
+      puts "message history--------------------------#{message.message_status} is the message_status "
       ActionCable.server.broadcast(
         "message_status_#{message.user_id}",
         { sid: message.twilio_sid, status: message.message_status }
