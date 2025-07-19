@@ -1,30 +1,27 @@
 class MessageHistoriesController < ApplicationController
   before_action :authenticate!,only: [:index, :create]
-  # before_action :validate_twilio_request, only: [:status_update]
-  # before_action :current_user
-  # GET /message_histories
+
   def index
-    @message_histories = current_user.message_histories.order_by(created_at: :desc)
+    @message_histories = MessageHistory.where(user_id: current_user.id).order_by(created_at: :desc)
     render json: @message_histories
   end
 
 
   def create
-    @message_history = current_user.message_histories.new(message_history_params)
-    @message_history.from = ENV['TWILIO_PHONE_NUMBER']
-    @message_history.mgs_count = @message_history.message.split("").count
-    @message_history.twilio_sid = SecureRandom.uuid
-    if @message_history.save
-      render json: @message_history, status: :created
+
+    t = TwilioService.new.send_sms(message_history_params[:to], message_history_params[:message])
+    @mh = MessageHistory.new(user_id: current_user.id, from: t.from, to: t.to, message: t.body, mgs_count: t.body.length, twilio_sid: t.sid, message_status: t.status)
+    if @mh.save
+      render json: @mh, status: :created
     else
-      render json: @message_history.errors, status: :unprocessable_entity
+      render json: @mh.errors, status: :unprocessable_entity
     end
   end
 
   def status_update
+    puts "message history--------------------------#{params.as_json} is the message_sid "
     message_sid = params[:MessageSid]
     status = params[:MessageStatus]
-    # Find and update message history
     message = MessageHistory.find_by(twilio_sid: message_sid)
     if message
       message.update!(message_status: status)
@@ -51,20 +48,6 @@ class MessageHistoriesController < ApplicationController
     params.require(:message_history).permit(:to, :message)
   end
 
-
-    def validate_twilio_request
-      validator = Twilio::Security::RequestValidator.new(
-        ENV['TWILIO_AUTH_TOKEN']
-      )
-
-    signature = request.headers['HTTP_X_TWILIO_SIGNATURE']
-    url = request.original_url
-    params = request.request_parameters
-
-    unless validator.validate(url, params, signature)
-      render plain: 'Invalid signature', status: :forbidden
-    end
-  end
 end
 
 
