@@ -19,6 +19,8 @@ module ApplicationCable
         else
           reject_unauthorized_connection
         end
+      rescue JWT::ExpiredSignature => e
+         :expired
       end
   end
 end

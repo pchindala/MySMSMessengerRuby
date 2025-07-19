@@ -11,6 +11,8 @@ class MessageStatusChannel < ApplicationCable::Channel
     reject unless user
 
     stream_from "message_status_#{user.id}"
+  rescue JWT::ExpiredSignature => e
+    :expired
   end
 
   def unsubscribed
